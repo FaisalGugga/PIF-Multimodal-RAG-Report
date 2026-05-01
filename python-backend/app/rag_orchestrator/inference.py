@@ -1,7 +1,14 @@
-import os
+from dotenv import load_dotenv
 from openai import OpenAI
+import os
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+load_dotenv('app/.env')
+
+api_key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+
 
 def generate_response(question: str, context: str) -> str:
     prompt = f"""
@@ -22,7 +29,7 @@ Answer:
 """
 
     response = client.chat.completions.create(
-        model="",
+        model="deepseek-v4-flash",
         messages=[
             {
                 "role": "system",

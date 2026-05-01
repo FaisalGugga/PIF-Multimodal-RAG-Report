@@ -1,9 +1,20 @@
+import logging
+
 from fastapi import FastAPI
-from ..app.routes.upload import router as upload_router
+from .routers.ask import router as ask_router
+from .routers.upload import router as upload_router
+from .routers.index import router as index_router
+# log from index.py
+
+logging.basicConfig(level=logging.INFO)
+
+
 
 app = FastAPI(title="PIF Multimodal RAG Document Analysis")
 
-app.include_router(upload_router, prefix="/api")
+app.include_router(ask_router)
+app.include_router(upload_router)
+app.include_router(index_router)
 
 @app.get('/')
 def root():

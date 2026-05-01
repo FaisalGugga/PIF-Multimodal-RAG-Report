@@ -1,4 +1,5 @@
 from .retrieval import retrieve_relevant_chunks
+from .inference import generate_response
 
 
 def build_context_from_chunks(chunks: list[dict]) -> str:
@@ -19,9 +20,12 @@ def run_rag_pipeline(question: str, limit: int = 5) -> dict:
     
     context = build_context_from_chunks(retrieved_chunks)
     
+    answer = generate_response(question, context)
+    
     return {
         "question": question,
         "context": context,
+        "answer": answer,
         "sources": [
             {
                 "score": chunk["score"],

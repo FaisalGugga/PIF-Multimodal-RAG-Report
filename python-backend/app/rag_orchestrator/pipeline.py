@@ -8,10 +8,11 @@ def build_context_from_chunks(chunks: list[dict]) -> str:
     
     
     for chunk in chunks:
+        document_name = chunk["document_name"]
         page_number = chunk["page_number"]
         text = chunk["text"]
         
-        context_parts.append(f"Page {page_number}:\n{text}")
+        context_parts.append(f"Document: {document_name} - Page {page_number}:\n{text}")
         
     return "\n\n---\n\n".join(context_parts)
 
@@ -24,14 +25,14 @@ def run_rag_pipeline(question: str, limit: int = 5) -> dict:
     
     return {
         "question": question,
-        "context": context,
         "answer": answer,
         "sources": [
             {
                 "score": chunk["score"],
+                "document_name": chunk["document_name"],
                 "page_number": chunk["page_number"],
                 "chunk_id": chunk["chunk_id"],
-                "text": chunk["text"]
+                "text": chunk["text"],
             }
             for chunk in retrieved_chunks
         ]

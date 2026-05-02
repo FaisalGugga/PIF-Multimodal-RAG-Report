@@ -19,6 +19,7 @@ def retrieve_relevant_chunks(question: str, limit: int = 5) -> list[dict]:
     for point in result.points:
         retrieved_chunks.append({
             "score": point.score,
+            "document_name": point.payload["document_name"],
             "page_number": point.payload["page_number"],
             "chunk_id": point.payload["chunk_id"],
             "text": point.payload["text"]

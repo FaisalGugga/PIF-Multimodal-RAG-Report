@@ -1,7 +1,7 @@
 import uuid
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance, PointStruct
+from qdrant_client.models import VectorParams, Distance, PointStruct, Filter, FieldCondition, MatchValue
 
 COLLECTION_NAME = 'pif_reports_collection'
 
@@ -28,6 +28,20 @@ def create_point_id(document_name: str, chunk_id: str) -> str:
     unique_key = f"{document_name}:{chunk_id}"
     return str(uuid.uuid5(uuid.NAMESPACE_URL, unique_key))        
 
+def delete_document_chunks(document_id: str):
+    document_filter_document_id = Filter(
+        must = [
+            FieldCondition(
+                key = "document_id",
+                match = MatchValue(value=document_id)
+            )
+        ]
+    )
+    
+    client.delete(
+        collection_name = COLLECTION_NAME,
+        points_selector = document_filter_document_id
+    )
     
 def upload_chunks_to_qdrant(embedded_chunks: list[dict]):
     

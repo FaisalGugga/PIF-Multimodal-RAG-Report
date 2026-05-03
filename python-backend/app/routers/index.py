@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..rag_orchestrator.indexing import build_chunks_for_pdf
 from ..rag_orchestrator.embeddings import embed_documents
-from ..rag_orchestrator.qdrant_service import create_collection, upload_chunks_to_qdrant
+from ..rag_orchestrator.qdrant_service import create_collection, upload_chunks_to_qdrant, delete_document_chunks
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -40,6 +40,7 @@ def index_pdf(request: IndexRequest):
         # logger.info(f"Built embedded_chunks: {embedded_chunks}.")
         
         create_collection()
+        delete_document_chunks(request.document_id)
         upload_chunks_to_qdrant(embedded_chunks)
         
         return {

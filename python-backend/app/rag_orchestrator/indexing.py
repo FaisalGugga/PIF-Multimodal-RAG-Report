@@ -3,7 +3,13 @@ from pathlib import Path
 from app.rag_orchestrator.document_service import extract_text_from_pdf
 from app.utils.chunking import chunk_text
 
-def build_chunks_for_pdf(pdf_path: str) -> list[dict]:
+
+def build_chunks_for_pdf(pdf_path: str, 
+                         document_id: str, 
+                         company_id: str, 
+                         year: int
+                         ) -> list[dict]:
+    
     pages = extract_text_from_pdf(pdf_path)
     all_chunks = []
     
@@ -17,6 +23,9 @@ def build_chunks_for_pdf(pdf_path: str) -> list[dict]:
         
         for chunk_index, chunk in enumerate(chunks):
             all_chunks.append({
+                "document_id": document_id,
+                "company_id": company_id,
+                "year": year,
                 "document_name": document_name,
                 "page_number": page_number,
                 "chunk_id": f"{page_number}_{chunk_index}",

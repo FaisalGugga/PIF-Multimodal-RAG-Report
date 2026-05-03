@@ -11,12 +11,17 @@ from ..rag_orchestrator.qdrant_service import create_collection, upload_chunks_t
 router = APIRouter()
 logger = logging.getLogger(__name__)
     
+    
 class IndexRequest(BaseModel):
     file_path: str
+    document_id: str
+    company_id: str
+    year: int
     max_chunks: int | None = None
     
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 UPLOAD_DIR = PROJECT_ROOT / "data" / "uploaded_pdfs"
+
 
 @router.post("/index")
 def index_pdf(request: IndexRequest):
@@ -26,7 +31,7 @@ def index_pdf(request: IndexRequest):
         raise HTTPException(detail=f"File '{request.file_path}' not found. PROJECT_ROOT: {PROJECT_ROOT}. UPLOAD_DIR: {UPLOAD_DIR}", status_code=404)
     
     try:
-        chunks = build_chunks_for_pdf(pdf_path)
+        chunks = build_chunks_for_pdf(str(pdf_path), request.document_id, request.company_id, request.year)
         
         if request.max_chunks is not None:
             chunks = chunks[:request.max_chunks]
@@ -39,6 +44,9 @@ def index_pdf(request: IndexRequest):
         
         return {
             "message": "PDF indexed successfully",
+            "document_id": request.document_id,
+            "company_id": request.company_id,
+            "year": request.year,
             "file_name": request.file_path,
             "total_chunks": len(chunks),
             "indexed_chunks": len(embedded_chunks)

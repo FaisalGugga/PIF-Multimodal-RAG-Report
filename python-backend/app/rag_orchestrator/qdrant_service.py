@@ -3,7 +3,7 @@ import uuid
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
 
-COLLECTION_NAME = 'document_chunks'
+COLLECTION_NAME = 'pif_reports_collection'
 
 client = QdrantClient("localhost", port=6333)
 
@@ -43,6 +43,9 @@ def upload_chunks_to_qdrant(embedded_chunks: list[dict]):
             id = point_id,
             vector = chunk["embedding"],
             payload = {
+                "document_id": chunk["document_id"],
+                "company_id": chunk["company_id"],
+                "year": chunk["year"],
                 "document_name": chunk["document_name"],
                 "page_number": chunk["page_number"],
                 "chunk_id": chunk["chunk_id"],

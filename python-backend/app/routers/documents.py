@@ -1,11 +1,9 @@
 from pathlib import Path
 from fastapi import APIRouter
 
+from app.config import UPLOAD_DIR
 
 router = APIRouter()
-
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-UPLOAD_DIR = PROJECT_ROOT / "data" / "uploaded_pdfs"
 
 
 @router.get("/documents")

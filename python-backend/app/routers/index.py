@@ -8,6 +8,8 @@ from ..rag_orchestrator.indexing import build_chunks_for_pdf
 from ..rag_orchestrator.embeddings import embed_documents
 from ..rag_orchestrator.qdrant_service import create_collection, upload_chunks_to_qdrant, delete_document_chunks
 
+from app.config import UPLOAD_DIR, PROJECT_ROOT
+
 router = APIRouter()
 logger = logging.getLogger(__name__)
     
@@ -18,9 +20,6 @@ class IndexRequest(BaseModel):
     company_id: str
     year: int
     max_chunks: int | None = None
-    
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-UPLOAD_DIR = PROJECT_ROOT / "data" / "uploaded_pdfs"
 
 
 @router.post("/index")

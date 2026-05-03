@@ -3,9 +3,12 @@ import uuid
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct, Filter, FieldCondition, MatchValue
 
-COLLECTION_NAME = 'pif_reports_collection'
+from app.config import QDRANT_COLLECTION_NAME, QDRANT_URL
 
-client = QdrantClient("localhost", port=6333)
+
+COLLECTION_NAME = QDRANT_COLLECTION_NAME
+
+client = QdrantClient(url=QDRANT_URL)
 
 def create_collection(vector_size: int = 384):
     

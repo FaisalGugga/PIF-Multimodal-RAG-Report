@@ -1,6 +1,8 @@
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+from app.config import EMBEDDING_MODEL_NAME
+
+model = SentenceTransformer(EMBEDDING_MODEL_NAME)
 
 def embed_documents(chunks: list[dict]) -> list[dict]:
     

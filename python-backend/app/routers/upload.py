@@ -1,11 +1,10 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from pathlib import Path
 
+from app.config import UPLOAD_DIR
 
 router =APIRouter()
 
-BASE_DIR = Path(__file__).resolve().parents[3]
-UPLOAD_DIR = BASE_DIR / "data" / "uploaded_pdfs"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.post("/upload")

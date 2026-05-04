@@ -3,3 +3,4 @@
 .env
 test.test
 *.png
+gpt-context

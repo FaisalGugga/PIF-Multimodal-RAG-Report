@@ -1,6 +1,8 @@
 from .retrieval import retrieve_relevant_chunks
 from .inference import generate_response
 
+from urllib.parse import urlencode
+
 
 def build_context_from_chunks(chunks: list[dict]) -> str:
     
@@ -19,6 +21,13 @@ def build_context_from_chunks(chunks: list[dict]) -> str:
         
     return "\n\n---\n\n".join(context_parts)
 
+def build_page_image_url(document_name: str, page_number: int) -> str:
+    query_params = urlencode({
+        "filename": document_name,
+        "page_number": page_number
+    })
+    
+    return f"/page_image?{query_params}"
 
 def run_rag_pipeline(question: str, limit: int = 5, document_id: str | None = None, company_id: str | None = None, year: int | None = None) -> dict:
     
@@ -42,6 +51,10 @@ def run_rag_pipeline(question: str, limit: int = 5, document_id: str | None = No
                 "page_number": chunk["page_number"],
                 "chunk_id": chunk["chunk_id"],
                 "text": chunk["text"],
+                "image_url": build_page_image_url(
+                    document_name=chunk["document_name"],
+                    page_number=chunk["page_number"]
+                )
             }
             for chunk in retrieved_chunks
         ]

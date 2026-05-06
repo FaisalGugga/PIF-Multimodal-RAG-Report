@@ -7,6 +7,10 @@ from .routers.upload import router as upload_router
 from .routers.index import router as index_router
 from .routers.documents import router as documents_router
 from .routers.page_image import router as page_image_router
+
+from .request_id_middleware import RequestIdMiddleware
+
+
 # log from index.py
 
 setup_logging()
@@ -14,6 +18,8 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="PIF Multimodal RAG Document Analysis")
+
+app.add_middleware(RequestIdMiddleware)
 
 app.include_router(ask_router)
 app.include_router(upload_router)

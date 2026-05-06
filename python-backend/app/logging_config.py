@@ -2,6 +2,7 @@ import json
 import logging
 import sys
 from datetime import datetime
+from .request_context import request_id_context
 
 
 
@@ -21,6 +22,7 @@ class JsonFormatter(logging.Formatter):
             "message": record.getMessage(),
         }
         
+        
         for key, value in record.__dict__.items():
             if key not in RESERVED_LOG_RECORD_FIELDS and not key.startswith("_"):
                 try:
@@ -28,6 +30,11 @@ class JsonFormatter(logging.Formatter):
                     log_data[key] = value
                 except TypeError:
                     log_data[key] = str(value)
+                    
+        request_id = request_id_context.get()
+        
+        if request_id:
+            log_data["request_id"] = request_id
                     
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)

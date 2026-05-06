@@ -27,7 +27,7 @@ def build_page_image_url(document_name: str, page_number: int) -> str:
         "page_number": page_number
     })
     
-    return f"/page_image?{query_params}"
+    return f"/page-image?{query_params}"
 
 def run_rag_pipeline(question: str, limit: int = 5, document_id: str | None = None, company_id: str | None = None, year: int | None = None) -> dict:
     

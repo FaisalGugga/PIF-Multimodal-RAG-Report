@@ -1,0 +1,11 @@
+filebeat.inputs:
+  - type: filestream
+    id: fastapi-rag-app-logs
+    enabled: true
+    paths:
+      - /var/log/fastapi/app.log
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+logging.level: info

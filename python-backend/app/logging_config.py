@@ -4,6 +4,9 @@ import sys
 from datetime import datetime
 from .request_context import request_id_context
 
+from .config import LOG_DIR, LOG_FILE
+from logging.handlers import RotatingFileHandler
+
 
 
 RESERVED_LOG_RECORD_FIELDS = {
@@ -43,15 +46,30 @@ class JsonFormatter(logging.Formatter):
         
             
 def setup_logging() -> None:
+    
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+
     root_logger = logging.getLogger()
     
     root_logger.handlers.clear()
     root_logger.setLevel(logging.INFO)
     
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(JsonFormatter())
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(JsonFormatter())
     
-    root_logger.addHandler(handler)
+    file_handler = RotatingFileHandler(
+        filename=LOG_FILE,
+        maxBytes=10 * 1024 * 1024,
+        backupCount=5,
+        encoding="utf-8",
+    )
+    
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(JsonFormatter())
+    
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+    
             
 
 

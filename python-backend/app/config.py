@@ -11,6 +11,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 UPLOAD_DIR = PROJECT_ROOT / "data" / "uploaded_pdfs"
 RENDERED_PAGES_DIR = PROJECT_ROOT / "data" / "rendered_pages"
 
+LOG_DIR = PROJECT_ROOT / "logs"
+LOG_FILE = LOG_DIR / "app.log"
+
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME")
 

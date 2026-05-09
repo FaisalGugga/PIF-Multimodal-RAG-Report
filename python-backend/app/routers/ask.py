@@ -3,7 +3,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from app.rag_orchestrator.ask_orchestrator import ask_single_document
+from app.rag_orchestrator.ask_orchestrator import ask_single_document, ask_multiple_documents
 
 router = APIRouter()
 
@@ -38,11 +38,21 @@ def ask(request: AskRequest):
             
     
         if request.mode == "compare":
-            raise HTTPException(
-                status_code=501,
-                detail="Compare mode is not implemented yet. It will be added in the next step."
-            )
-        
+            if len(request.document_ids) < 2:
+                raise HTTPException(status_code=400, detail="Compare mode requires at least two document_ids")
+
+            try:
+                return ask_multiple_documents(
+                    question=request.question,
+                    document_ids=request.document_ids,
+                    limit=request.limit
+                )
+
+            except Exception as error:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to compare documents: {str(error)}"
+                )
         
         # result = run_rag_pipeline(
         #     question=request.question,

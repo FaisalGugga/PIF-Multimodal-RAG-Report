@@ -5,6 +5,68 @@ from .inference import synthesize_multi_document_answer
 
 logger = logging.getLogger(__name__)
 
+
+def build_document_evidence_question(question: str) -> str:
+    return f"""
+        The user is asking a question that may involve comparing multiple documents.
+
+        Original user question:
+        {question}
+
+        For this selected document only:
+        Find the information in this document that is relevant to the user's question.
+
+        The relevant information may be:
+        - a numeric metric or value
+        - a fact
+        - a statement
+        - a policy
+        - a strategy
+        - a target
+        - a change
+        - a table row
+        - a description
+        - any context needed to answer the question
+
+        If numeric data is available and relevant, include the number, unit, year, and label.
+        If the answer is text-based, summarize the relevant statement clearly.
+
+        Do not compare against other documents.
+        Do not use outside knowledge.
+        Answer only from this document.
+        """
+
+
+def build_document_answer_title(document_id: str, sources: list[dict]) -> str:
+    if sources:
+        company = sources[0].get("company")
+        year = sources[0].get("year")
+
+        if company and year:
+            return f"{company} {year} Analysis"
+        
+        if year:
+            return f"{year} Document Analysis"
+    
+    return f"{document_id} Analysis"
+
+
+def format_document_answer_for_compare(
+    single_document_result: dict,
+    original_question: str,
+) -> dict:
+    sources = single_document_result.get("sources")
+    document_id = single_document_result.get("document_id")
+
+    return {
+        "document_id": document_id,
+        "title": build_document_answer_title(document_id, sources),
+        "question": original_question,
+        "answer": single_document_result.get("answer"),
+        "sources": sources,
+    }
+
+
 def ask_single_document(
     question: str,
     document_id: str,
@@ -44,35 +106,6 @@ def ask_single_document(
     
     return response
 
-def build_document_evidence_question(question: str) -> str:
-    return f"""
-        The user is asking a question that may involve comparing multiple documents.
-
-        Original user question:
-        {question}
-
-        For this selected document only:
-        Find the information in this document that is relevant to the user's question.
-
-        The relevant information may be:
-        - a numeric metric or value
-        - a fact
-        - a statement
-        - a policy
-        - a strategy
-        - a target
-        - a change
-        - a table row
-        - a description
-        - any context needed to answer the question
-
-        If numeric data is available and relevant, include the number, unit, year, and label.
-        If the answer is text-based, summarize the relevant statement clearly.
-
-        Do not compare against other documents.
-        Do not use outside knowledge.
-        Answer only from this document.
-        """
 
 def ask_multiple_documents(
     question: str,
@@ -100,8 +133,13 @@ def ask_multiple_documents(
             limit=limit
         )
         
-        single_document_result["original_question"] = question
-        document_answers.append(single_document_result)
+        formatted_document_answer = format_document_answer_for_compare(
+            single_document_result=single_document_result, 
+            original_question=question
+        )
+        
+        # single_document_result["original_question"] = question
+        document_answers.append(formatted_document_answer)
         
     final_answer = synthesize_multi_document_answer(
         question=question,

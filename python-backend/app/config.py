@@ -14,6 +14,8 @@ RENDERED_PAGES_DIR = PROJECT_ROOT / "data" / "rendered_pages"
 LOG_DIR = PROJECT_ROOT / "logs"
 LOG_FILE = LOG_DIR / "app.log"
 
+DOCUMENT_REGISTRY_FILE = PROJECT_ROOT / "data" / "documents.json"
+
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME")
 

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from ..rag_orchestrator.indexing import build_chunks_for_pdf
 from ..rag_orchestrator.embeddings import embed_documents
 from ..rag_orchestrator.qdrant_service import create_collection, upload_chunks_to_qdrant, delete_document_chunks
+from ..rag_orchestrator.document_registry import upsert_document
 
 from app.config import UPLOAD_DIR, PROJECT_ROOT
 
@@ -41,6 +42,15 @@ def index_pdf(request: IndexRequest):
         create_collection()
         delete_document_chunks(request.document_id)
         upload_chunks_to_qdrant(embedded_chunks)
+        
+        upsert_document({
+        "document_id": request.document_id,
+        "filename": request.filename,
+        "document_name": request.filename,
+        "company": request.company,
+        "year": request.year,
+        "status": "indexed",
+    })
         
         return {
             "message": "PDF indexed successfully",

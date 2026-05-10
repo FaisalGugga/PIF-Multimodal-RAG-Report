@@ -51,18 +51,46 @@ def build_document_answer_title(document_id: str, sources: list[dict]) -> str:
     return f"{document_id} Analysis"
 
 
+def get_evidance_status(answer: str | None, sources: list[dict]) -> str:
+    if not sources:
+        return "not_found"
+    if not answer:
+        return "not_found"
+
+    not_found_phrases = [
+        "could not find",
+        "not found",
+        "not available",
+        "does not contain",
+        "provided context does not",
+        "cannot determine",
+        "insufficient information",
+    ]
+    
+    normalized_answer = answer.lower()
+    
+    for phrase in not_found_phrases:
+        if phrase in normalized_answer:
+            return "not_found"
+        
+    return "found"
+
+
 def format_document_answer_for_compare(
     single_document_result: dict,
     original_question: str,
 ) -> dict:
     sources = single_document_result.get("sources")
     document_id = single_document_result.get("document_id")
+    answer = single_document_result.get("answer")
+    
+    evidence_status = get_evidance_status(answer=answer)
 
     return {
         "document_id": document_id,
         "title": build_document_answer_title(document_id, sources),
         "question": original_question,
-        "answer": single_document_result.get("answer"),
+        "answer": evidence_status,
         "sources": sources,
     }
 

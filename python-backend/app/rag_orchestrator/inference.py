@@ -71,37 +71,39 @@ def synthesize_multi_document_answer(
         
         document_summaries.append({
             "document_id": document_answer.get("document_id"),
+            "titl": document_answer.get("title"),
+            "evidence_status": document_answer.get("evidence_status"), 
             "answer": document_answer.get("answer"), 
             "source_pages": source_pages, 
 
         })
         
-    prompt = f"""
-        You are an AI assistant performing comparative analysis across multiple financial documents.
+        prompt = f"""
+        You are an AI assistant answering a user's comparison question across multiple financial documents.
 
-        The user asked:
+        User question:
         {question}
 
-        Below are answers generated separately from each selected document.
-        Each answer was generated using only that specific document.
+        Below are document-specific answers generated separately from each selected document.
+        Each answer was generated using only that document.
 
         Document answers:
         {json.dumps(document_summaries, indent=2, ensure_ascii=False)}
 
-        Your task:
-        Write the comparative analysis result only.
+        Write the final comparative answer for the user.
 
         Rules:
-        1. Compare the document answers clearly.
-        2. If the question is numeric and the needed numbers are available, calculate the difference and percentage change when possible.
-        3. If the question is text-based, compare the relevant statements, strategies, policies, or facts.
-        4. Mention the document year/company when available.
-        5. Use only the provided document answers and source pages.
-        6. If one document is missing evidence, say that clearly.
-        7. Do not invent facts.
-        8. Do not include the separate document answers again. Those are returned separately by the API.
+        1. Answer the user's question directly.
+        2. Do not explain the internal retrieval process.
+        3. Do not mention technical fields such as evidence_status, source_pages, chunks, retrieval, context, or document_summaries.
+        4. If enough evidence is available, provide a clear comparison.
+        5. If numeric values are available, calculate the absolute difference and percentage change when possible.
+        6. If evidence is missing from one or more documents, say this briefly in user-friendly language.
+        7. Do not invent missing numbers or facts.
+        8. Do not repeat the full separate document answers.
+        9. Keep the answer concise and business-readable.
 
-        Comparative analysis result:
+        Final comparative answer:
         """
 
     response = client.chat.completions.create(

@@ -84,13 +84,15 @@ def format_document_answer_for_compare(
     document_id = single_document_result.get("document_id")
     answer = single_document_result.get("answer")
     
-    evidence_status = get_evidance_status(answer=answer)
+    evidence_status = get_evidance_status(answer=answer, sources=sources)
+
 
     return {
         "document_id": document_id,
         "title": build_document_answer_title(document_id, sources),
         "question": original_question,
-        "answer": evidence_status,
+        "evidence_status": evidence_status,
+        "answer": answer,
         "sources": sources,
     }
 
@@ -169,9 +171,40 @@ def ask_multiple_documents(
         # single_document_result["original_question"] = question
         document_answers.append(formatted_document_answer)
         
+        logger.info(
+            "Compare document evidence status",
+            extra={
+                "event": "compare_document_evidence_status",
+                "document_id": formatted_document_answer["document_id"],
+                "title": formatted_document_answer["title"],
+                "evidence_status": formatted_document_answer["evidence_status"],
+                "sources_count": len(formatted_document_answer["sources"]),
+            }
+        )
+    
+    
+    logger.info(
+    "Comparison synthesis started",
+    extra={
+        "event": "comparison_synthesis_started",
+        "document_ids": document_ids,
+        "documents_count": len(document_answers),
+        }
+    )
+        
+        
     final_answer = synthesize_multi_document_answer(
         question=question,
         document_answers=document_answers
+    )
+    
+    logger.info(
+    "Comparison synthesis completed",
+    extra={
+        "event": "comparison_synthesis_completed",
+        "document_ids": document_ids,
+        "documents_count": len(document_answers),
+        }
     )
     
     response = {

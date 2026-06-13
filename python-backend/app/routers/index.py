@@ -14,9 +14,8 @@ from app.config import UPLOAD_DIR, PROJECT_ROOT
 router = APIRouter()
 logger = logging.getLogger(__name__)
     
-    
 class IndexRequest(BaseModel):
-    file_path: str
+    filename: str
     document_id: str
     company_id: str
     year: int
@@ -25,10 +24,10 @@ class IndexRequest(BaseModel):
 
 @router.post("/index")
 def index_pdf(request: IndexRequest):
-    pdf_path = UPLOAD_DIR / request.file_path
+    pdf_path = UPLOAD_DIR / request.filename
     
     if not pdf_path.exists():
-        raise HTTPException(detail=f"File '{request.file_path}' not found. PROJECT_ROOT: {PROJECT_ROOT}. UPLOAD_DIR: {UPLOAD_DIR}", status_code=404)
+        raise HTTPException(detail=f"File '{request.filename}' not found. PROJECT_ROOT: {PROJECT_ROOT}. UPLOAD_DIR: {UPLOAD_DIR}", status_code=404)
     
     try:
         chunks = build_chunks_for_pdf(str(pdf_path), request.document_id, request.company_id, request.year)
@@ -43,23 +42,19 @@ def index_pdf(request: IndexRequest):
         delete_document_chunks(request.document_id)
         upload_chunks_to_qdrant(embedded_chunks)
         
-        upsert_document({
+        registered_document = upsert_document({
         "document_id": request.document_id,
         "filename": request.filename,
         "document_name": request.filename,
-        "company": request.company,
+        "company_id": request.company_id,
         "year": request.year,
         "status": "indexed",
     })
         
         return {
             "message": "PDF indexed successfully",
-            "document_id": request.document_id,
-            "company_id": request.company_id,
-            "year": request.year,
-            "file_name": request.file_path,
-            "total_chunks": len(chunks),
-            "indexed_chunks": len(embedded_chunks)
+            "status": "success",
+            "document": registered_document,
         }
         
     except Exception as e:

@@ -33,7 +33,7 @@ def document_record_to_dict(document: DocumentRecord) -> dict[str, Any]:
         "document_id": document.document_id,
         "filename": document.filename,
         "document_name": document.document_name,
-        "company": document.company,
+        "company_id": document.company_id,
         "year": document.year,
         "status": document.status,
         "created_at": document.created_at.isoformat(),
@@ -57,7 +57,7 @@ def upsert_document(document: dict[str, Any]) -> dict[str, Any]:
                 document_id=document["document_id"],
                 filename=document["filename"],
                 document_name=document["document_name"],
-                company=document["company"],
+                company_id=document["company_id"],
                 year=document["year"],
                 status=document.get("status", "uploaded"),
             )
@@ -67,7 +67,7 @@ def upsert_document(document: dict[str, Any]) -> dict[str, Any]:
             document_to_save = existing_document
             document_to_save.filename = document["filename"]
             document_to_save.document_name = document["document_name"]
-            document_to_save.company = document["company"]
+            document_to_save.company_id = document["company_id"]
             document_to_save.year = document["year"]
             document_to_save.status = document.get("status", existing_document.status)
             

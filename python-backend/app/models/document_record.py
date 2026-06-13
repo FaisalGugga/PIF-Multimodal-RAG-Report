@@ -36,7 +36,7 @@ class DocumentRecord(Base):
         nullable=False,
     )
     
-    company: Mapped[str] = mapped_column(
+    company_id: Mapped[str] = mapped_column(
         String(255),
         nullable=False,
     )

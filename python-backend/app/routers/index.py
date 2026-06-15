@@ -9,6 +9,13 @@ from ..rag_orchestrator.embeddings import embed_documents
 from ..rag_orchestrator.qdrant_service import create_collection, upload_chunks_to_qdrant, delete_document_chunks
 from ..rag_orchestrator.document_registry import upsert_document
 
+from ..rag_orchestrator.job_registry import (
+    create_indexing_job,
+    mark_job_processing,
+    mark_job_completed,
+    mark_job_failed,
+)
+
 from app.config import UPLOAD_DIR, PROJECT_ROOT
 
 router = APIRouter()
@@ -26,10 +33,19 @@ class IndexRequest(BaseModel):
 def index_pdf(request: IndexRequest):
     pdf_path = UPLOAD_DIR / request.filename
     
-    if not pdf_path.exists():
-        raise HTTPException(detail=f"File '{request.filename}' not found. PROJECT_ROOT: {PROJECT_ROOT}. UPLOAD_DIR: {UPLOAD_DIR}", status_code=404)
+    
+    job = create_indexing_job(request.document_id, request.filename)
+    job_id = job["job_id"]
     
     try:
+        mark_job_processing(job_id)
+        
+        if not pdf_path.exists():
+            raise HTTPException(detail={"status": "success",
+                                        "job": job,
+                                        "message": f"File '{request.filename}' not found. PROJECT_ROOT: {PROJECT_ROOT}. UPLOAD_DIR: {UPLOAD_DIR}"
+                                        }, status_code=404)
+    
         chunks = build_chunks_for_pdf(str(pdf_path), request.document_id, request.company_id, request.year)
         
         if request.max_chunks is not None:
@@ -42,6 +58,7 @@ def index_pdf(request: IndexRequest):
         delete_document_chunks(request.document_id)
         upload_chunks_to_qdrant(embedded_chunks)
         
+        
         registered_document = upsert_document({
         "document_id": request.document_id,
         "filename": request.filename,
@@ -51,11 +68,23 @@ def index_pdf(request: IndexRequest):
         "status": "indexed",
     })
         
+        complete_job = mark_job_completed(job_id)
+        
         return {
-            "message": "PDF indexed successfully",
             "status": "success",
+            "message": "PDF indexed successfully",
+            "job": complete_job,
             "document": registered_document,
         }
         
     except Exception as e:
-        raise HTTPException(detail=str(e), status_code=404)
+        failed_job = mark_job_failed(job_id, error_message=str(e))
+        
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Document indexing failed",
+                "job": failed_job,
+                "error": str(e),
+            },
+        )

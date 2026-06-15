@@ -26,7 +26,6 @@ class IndexingJob(Base):
     
     document_id: Mapped[str] = mapped_column(
         String(255),
-        unique=True,
         index=True,
         nullable=False
     )
